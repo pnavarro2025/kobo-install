@@ -114,9 +114,9 @@ services:
       - ENKETO_API_TOKEN=${ENKETO_API_TOKEN}
       - ENKETO_SECRET=${ENKETO_SECRET}
       - REDIS_URL=redis://redis-main:6379
-      - REDIS_CACHE_URL=redis://redis-cache:6379
       - ENKETO_REDIS_MAIN=redis://redis-main:6379
       - ENKETO_REDIS_CACHE=redis://redis-cache:6379
+      - REDIS_CACHE_URL=redis://redis-cache:6379
     depends_on:
       - redis-main
       - redis-cache
@@ -128,7 +128,7 @@ services:
     networks:
       - kobo-frontend-network
     ports:
-      - "80:80"
+      - "8081:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
