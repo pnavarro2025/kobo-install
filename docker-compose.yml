@@ -1,4 +1,20 @@
 version: "3.8"
 services:
-  placeholder:
-    image: hello-world
+  postgres:
+    image: postgis/postgis:14-3.3  # Imagen recomendada para KoboToolbox
+    container_name: kobo-postgres
+    restart: always
+    networks:
+      - kobo-backend-network
+    environment:
+      # Aquí se leen las claves directamente del archivo.env que pegaste en Elestio
+      - POSTGRES_USER=kobo
+      - POSTGRES_PASSWORD=KNCjcfwu19zbK4822Sz9K4O9CCJgaDDb
+      - KOBO_DB_NAME=kobo
+      - KOBO_DB_USER=kobo
+      - KOBO_DB_PASSWORD=0fAUTng11z6CCbyKkSiyPyw0NKx5hI5p
+      - KOBOCAT_DB_NAME=kobocat
+      - KOBOCAT_DB_USER=kobocat
+      - KOBOCAT_DB_PASSWORD=XavRiwMqDmq6odgIysAeboynAFqNsYVmdSOC8QK5BSk=
+    volumes:
+      - postgres_data_volume:/var/lib/postgresql/data
