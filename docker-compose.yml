@@ -1,26 +1,7 @@
-version: "3.8"
-services:
-  postgres:
-    image: postgis/postgis:14-3.3  # Imagen recomendada para KoboToolbox
-    container_name: kobo-postgres
-    restart: always
-    networks:
-      - kobo-backend-network
-    environment:
-      # Aquí se leen las claves directamente del archivo.env que pegaste en Elestio
-      - POSTGRES_USER=kobo
-      - POSTGRES_PASSWORD=KNCjcfwu19zbK4822Sz9K4O9CCJgaDDb
-      - KOBO_DB_NAME=kobo
-      - KOBO_DB_USER=kobo
-      - KOBO_DB_PASSWORD=0fAUTng11z6CCbyKkSiyPyw0NKx5hI5p
-      - KOBOCAT_DB_NAME=kobocat
-      - KOBOCAT_DB_USER=kobocat
-      - KOBOCAT_DB_PASSWORD=XavRiwMqDmq6odgIysAeboynAFqNsYVmdSOC8QK5BSk=
-    volumes:
-      - postgres_data_volume:/var/lib/postgresql/data
-      # ==============================================================================
+version: '3.8'
+
+# ==============================================================================
 # Definiciones de Redes y Volúmenes
-# Este bloque debe estar al final del archivo, al mismo nivel que "services:"
 # ==============================================================================
 networks:
   kobo-frontend-network:
@@ -35,3 +16,125 @@ volumes:
   redis_cache_data_volume:
   kpi_media_volume:
   kobocat_media_volume:
+
+# ==============================================================================
+# Servicios (Todos los componentes de KoBoToolbox)
+# ==============================================================================
+services:
+  postgres:
+    image: postgis/postgis:14-3.3
+    container_name: kobo-postgres
+    restart: always
+    networks:
+      - kobo-backend-network
+    environment:
+      - POSTGRES_USER=kobo
+      - POSTGRES_PASSWORD=KNCjcfwu19zbK4822Sz9K4O9CCJgaDDb
+      - KOBO_DB_NAME=kobo
+      - KOBO_DB_USER=kobo
+      - KOBO_DB_PASSWORD=0fAUTng11z6CCbyKkSiyPyw0NKx5hI5p
+      - KOBOCAT_DB_NAME=kobocat
+      - KOBOCAT_DB_USER=kobocat
+      - KOBOCAT_DB_PASSWORD=XavRiwMqDmq6odgIysAeboynAFqNsYVmdSOC8QK5BSk=
+    volumes:
+      - postgres_data_volume:/var/lib/postgresql/data
+
+  mongo:
+    image: mongo:5.0
+    container_name: kobo-mongo
+    restart: always
+    networks:
+      - kobo-backend-network
+    volumes:
+      - mongo_data_volume:/data/db
+
+  redis-main:
+    image: redis:6-alpine
+    container_name: kobo-redis-main
+    restart: always
+    networks:
+      - kobo-backend-network
+    volumes:
+      - redis_main_data_volume:/data
+
+  redis-cache:
+    image: redis:6-alpine
+    container_name: kobo-redis-cache
+    restart: always
+    networks:
+      - kobo-backend-network
+    volumes:
+      - redis_cache_data_volume:/data
+
+  kpi:
+    image: kobotoolbox/kpi:latest
+    container_name: kobo-kpi
+    restart: always
+    networks:
+      - kobo-frontend-network
+      - kobo-backend-network
+    environment:
+      - KPI_DATABASE_URL=postgres://kobo:0fAUTng11z6CCbyKkSiyPyw0NKx5hI5p@postgres:5432/kobo
+      - MONGODB_DATABASE=kobofe
+      - MONGODB_HOST=mongo
+      - REDIS_HOST=redis-cache
+      - DJANGO_SECRET_KEY=w9eZ/rT5sU8vX3yA1bC6dE7fG0hJ2kL4mN6pQ9rT1uY=
+      - SUPERUSER_USERNAME=admin_grupointelecto
+      - SUPERUSER_EMAIL=pnavarro@grupointelecto.cl
+      - SUPERUSER_PASSWORD=F7LfOgOmd4MuD0e8CURMJiJNyBtHNZBnTzSFhfnVRZE=
+    depends_on:
+      - postgres
+      - mongo
+      - redis-cache
+    volumes:
+      - kpi_media_volume:/srv/src/kpi/media
+
+  kobocat:
+    image: kobotoolbox/kobocat:latest
+    container_name: kobo-kobocat
+    restart: always
+    networks:
+      - kobo-frontend-network
+      - kobo-backend-network
+    environment:
+      - KOBOCAT_DATABASE_URL=postgres://kobocat:XavRiwMqDmq6odgIysAeboynAFqNsYVmdSOC8QK5BSk=@postgres:5432/kobocat
+      - MONGODB_DATABASE=kobofe
+      - MONGODB_HOST=mongo
+      - REDIS_HOST=redis-cache
+      - DJANGO_SECRET_KEY=AvU28Ihrl0f2l/dRjnXZKd95iZfoIM+JKjqnu3epKkA=
+    depends_on:
+      - postgres
+      - mongo
+      - redis-cache
+    volumes:
+      - kobocat_media_volume:/srv/src/kobocat/media
+
+  enketo:
+    image: kobotoolbox/enketo-express-extra-widgets:latest
+    container_name: kobo-enketo
+    restart: always
+    networks:
+      - kobo-frontend-network
+      - kobo-backend-network
+    environment:
+      - ENKETO_API_TOKEN=b8066c063d19e7cd6783aa1743256aa0f13fb3439507eb58c50ee505af1536a8
+      - ENKETO_SECRET=3AMIOJRlYxo1AntHSyaoKswrZNgwS6eWbH4Qxw+ncwc=
+      - REDIS_MAIN_URL=redis://redis-main:6379
+      - REDIS_CACHE_URL=redis://redis-cache:6379
+    depends_on:
+      - redis-main
+      - redis-cache
+
+  nginx:
+    image: kobotoolbox/nginx:latest
+    container_name: kobo-nginx
+    restart: always
+    networks:
+      - kobo-frontend-network
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - kpi
+      - kobocat
+      - enketo
