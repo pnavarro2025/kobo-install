@@ -62,7 +62,7 @@ services:
       - redis_cache_data_volume:/data
 
   enketo:
-    image: kobotoolbox/enketo-express:custom-confirmation-message
+    image: kobotoolbox/enketo-express: error-message-improvements-and-custom-confirmation-message-5511aca0
     container_name: enketo
     restart: always
     networks:
