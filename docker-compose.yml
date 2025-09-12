@@ -1,19 +1,5 @@
 version: '3.8'
 
-networks:
-  kobo-frontend-network:
-    driver: bridge
-  kobo-backend-network:
-    driver: bridge
-
-volumes:
-  postgres_data_volume:
-  mongo_data_volume:
-  redis_main_data_volume:
-  redis_cache_data_volume:
-  kpi_media_volume:
-  kobocat_media_volume:
-
 services:
   postgres:
     image: postgis/postgis:14-3.3
@@ -21,16 +7,6 @@ services:
     restart: always
     networks:
       - kobo-backend-network
-    environment:
-      POSTGRES_DB: ${KOBO_DB_NAME}
-      POSTGRES_USER: ${KOBO_DB_USER}
-      POSTGRES_PASSWORD: ${KOBO_USER_PASSWORD}
-      KOBO_DB_NAME: ${KOBO_DB_NAME}
-      KOBO_DB_USER: ${KOBO_DB_USER}
-      KOBO_DB_PASSWORD: ${KOBO_USER_PASSWORD}
-      KOBOCAT_DB_NAME: ${KOBOCAT_DB_NAME}
-      KOBOCAT_DB_USER: ${KOBOCAT_DB_USER}
-      KOBOCAT_DB_PASSWORD: ${KOBOCAT_USER_PASSWORD}
     volumes:
       - postgres_data_volume:/var/lib/postgresql/data
 
@@ -92,24 +68,21 @@ services:
       - kobo-frontend-network
       - kobo-backend-network
     environment:
-      DATABASE_URL: postgres://${KOBO_DB_USER}:${KOBO_USER_PASSWORD}@postgres:5432/${KOBO_DB_NAME}
-      KPI_DATABASE_URL: postgres://${KOBO_DB_USER}:${KOBO_USER_PASSWORD}@postgres:5432/${KOBO_DB_NAME}
-      KOBO_DB_NAME: ${KOBO_DB_NAME}
-      KOBO_DB_USER: ${KOBO_DB_USER}
-      KOBO_DB_PASSWORD: ${KOBO_USER_PASSWORD}
-      MONGODB_DATABASE: kobofe
-      MONGODB_HOST: mongo
-      REDIS_HOST: redis-cache
-      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
-      SUPERUSER_USERNAME: ${SUPERUSER_USERNAME}
-      SUPERUSER_EMAIL: ${SUPERUSER_EMAIL}
-      SUPERUSER_PASSWORD: ${SUPERUSER_PASSWORD}
+      # Ajusta estas variables según tus necesidades
+      POSTGRES_DB: kobo
+      POSTGRES_USER: kobo
+      POSTGRES_PASSWORD: kobo
+      POSTGRES_HOST: postgres
+      MONGO_HOST: mongo
+      REDIS_HOST: redis-main
+      REDIS_PORT: 6379
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME}
     depends_on:
       - postgres
       - mongo
-      - redis-cache
-    volumes:
-      - kpi_media_volume:/srv/src/kpi/media
+      - redis-main
 
   kobocat:
     image: kobotoolbox/kobocat:2.024.19e
@@ -119,14 +92,13 @@ services:
       - kobo-frontend-network
       - kobo-backend-network
     environment:
-      KOBOCAT_DATABASE_URL: postgres://${KOBOCAT_DB_USER}:${KOBOCAT_USER_PASSWORD}@postgres:5432/${KOBOCAT_DB_NAME}
-      DATABASE_URL: postgres://${KOBO_DB_USER}:${KOBO_USER_PASSWORD}@postgres:5432/${KOBO_DB_NAME}
-      KOBOCAT_DB_NAME: ${KOBOCAT_DB_NAME}
-      KOBOCAT_DB_USER: ${KOBOCAT_DB_USER}
-      KOBOCAT_DB_PASSWORD: ${KOBOCAT_USER_PASSWORD}
-      MONGODB_HOST: mongo
+      POSTGRES_DB: kobo
+      POSTGRES_USER: kobo
+      POSTGRES_PASSWORD: kobo
+      POSTGRES_HOST: postgres
+      MONGO_HOST: mongo
       REDIS_HOST: redis-main
-      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY_2}
+      REDIS_PORT: 6379
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME}
@@ -134,20 +106,27 @@ services:
       - postgres
       - mongo
       - redis-main
-    volumes:
-      - kobocat_media_volume:/srv/src/kobocat/media
 
   nginx:
     image: nginx:1.25-alpine
     container_name: nginx
     restart: always
-    networks:
-      - kobo-frontend-network
     ports:
       - "8081:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - kobo-frontend-network
+      - kobo-backend-network
     depends_on:
+      - enketo
       - kpi
       - kobocat
-      - enketo
+
+networks:
+  kobo-frontend-network:
+  kobo-backend-network:
+
+volumes:
+  postgres_data_volume:
+  mongo_data_volume:
+  redis_main_data_volume:
+  redis_cache_data_volume:
