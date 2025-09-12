@@ -24,11 +24,11 @@ services:
     environment:
       - POSTGRES_USER=kobo
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - KOBO_DB_NAME=kobo
-      - KOBO_DB_USER=kobo
+      - KOBO_DB_NAME=${KOBO_DB_NAME}
+      - KOBO_DB_USER=${KOBO_DB_USER}
       - KOBO_DB_PASSWORD=${KOBO_USER_PASSWORD}
-      - KOBOCAT_DB_NAME=kobocat
-      - KOBOCAT_DB_USER=kobocat
+      - KOBOCAT_DB_NAME=${KOBOCAT_DB_NAME}
+      - KOBOCAT_DB_USER=${KOBOCAT_DB_USER}
       - KOBOCAT_DB_PASSWORD=${KOBOCAT_USER_PASSWORD}
     volumes:
       - postgres_data_volume:/var/lib/postgresql/data
