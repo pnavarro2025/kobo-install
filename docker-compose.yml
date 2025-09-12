@@ -18,3 +18,20 @@ services:
       - KOBOCAT_DB_PASSWORD=XavRiwMqDmq6odgIysAeboynAFqNsYVmdSOC8QK5BSk=
     volumes:
       - postgres_data_volume:/var/lib/postgresql/data
+      # ==============================================================================
+# Definiciones de Redes y Volúmenes
+# Este bloque debe estar al final del archivo, al mismo nivel que "services:"
+# ==============================================================================
+networks:
+  kobo-frontend-network:
+    driver: bridge
+  kobo-backend-network:
+    driver: bridge
+
+volumes:
+  postgres_data_volume:
+  mongo_data_volume:
+  redis_main_data_volume:
+  redis_cache_data_volume:
+  kpi_media_volume:
+  kobocat_media_volume:
