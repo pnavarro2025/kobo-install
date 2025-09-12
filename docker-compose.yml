@@ -61,7 +61,7 @@ services:
       - redis_cache_data_volume:/data
 
   kpi:
-    image: kobotoolbox/kpi:2.022.24
+    image: kobotoolbox/kpi:2.025.34b
     container_name: kpi
     restart: always
     networks:
@@ -84,7 +84,7 @@ services:
       - kpi_media_volume:/srv/src/kpi/media
 
   kobocat:
-    image: kobotoolbox/kobocat:2.021.39a
+    image: kobotoolbox/kobocat:2.024.19e
     container_name: kobocat
     restart: always
     networks:
@@ -104,7 +104,7 @@ services:
       - kobocat_media_volume:/srv/src/kobocat/media
 
   enketo:
-    image: kobotoolbox/enketo-express:2.3.7
+    image: kobotoolbox/enketo-express:custom-confirmation-message
     container_name: enketo
     restart: always
     networks:
@@ -126,7 +126,7 @@ services:
     networks:
       - kobo-frontend-network
     ports:
-      - "80:80"
+      - "8081:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
