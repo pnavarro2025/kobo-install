@@ -103,8 +103,8 @@ services:
     volumes:
       - kobocat_media_volume:/srv/src/kobocat/media
 
-  enketo:
-    image: kobotoolbox/enketo-express-extra-widgets:latest
+   enketo:
+    image: kobotoolbox/enketo-express:latest
     container_name: enketo
     restart: always
     networks:
