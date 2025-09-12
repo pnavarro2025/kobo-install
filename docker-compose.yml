@@ -61,7 +61,7 @@ services:
       - redis_cache_data_volume:/data
 
   kpi:
-    image: kobotoolbox/kpi:latest
+    image: kobotoolbox/kpi:2.022.24
     container_name: kpi
     restart: always
     networks:
@@ -84,7 +84,7 @@ services:
       - kpi_media_volume:/srv/src/kpi/media
 
   kobocat:
-    image: kobotoolbox/kobocat:latest
+    image: kobotoolbox/kobocat:2.021.39a
     container_name: kobocat
     restart: always
     networks:
@@ -104,7 +104,7 @@ services:
       - kobocat_media_volume:/srv/src/kobocat/media
 
   enketo:
-    image: kobotoolbox/enketo-express:latest
+    image: kobotoolbox/enketo-express:2.3.7
     container_name: enketo
     restart: always
     networks:
