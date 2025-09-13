@@ -36,7 +36,7 @@ services:
       - redis-cache
 
   kpi:
-    image: kobotoolbox/kpi:2.021.36a
+    image: kobotoolbox/kpi:2.025.34b
     restart: always
     depends_on:
       - postgres
